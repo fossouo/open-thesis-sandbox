@@ -14,6 +14,27 @@ any analysis later.
 > exposing the OpenAI Chat Completions shape (OpenAI itself, Ollama, vLLM,
 > llama.cpp, LiteLLM, LM Studio, etc.).
 
+## First boot
+
+1. Copy the environment template and fill in your real values:
+   ```bash
+   cp .env.example .env
+   # then edit .env — set LITELLM_URL, LITELLM_MODEL, LITELLM_API_KEY
+   ```
+   > The startup guard will reject a missing or self-pointing `LITELLM_URL`
+   > (e.g. `http://localhost:8000/...` causes a self-loop — the app calls itself).
+
+2. Download stock data:
+   ```bash
+   python3 download_data.py
+   ```
+
+3. Start the server:
+   ```bash
+   ./run_local.sh
+   ```
+   Server runs on http://localhost:8000
+
 ## Quick start
 
 ```bash

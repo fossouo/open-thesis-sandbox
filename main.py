@@ -1,4 +1,5 @@
 import os
+import sys
 import json
 import logging
 import httpx
@@ -6,6 +7,8 @@ import wave
 import hashlib
 import re
 import asyncio
+import urllib.parse
+import urllib.request
 from pathlib import Path
 from datetime import datetime, timezone, timedelta
 from typing import Optional
@@ -26,6 +29,106 @@ from core.auto_research import (
 # Setup logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("financial_thesis_sandbox")
+
+
+def _validate_environment() -> None:
+    """
+    Validate required environment variables before the app starts.
+
+    Hard-fails (sys.exit(1)) if:
+      - LITELLM_URL is missing or empty
+      - LITELLM_URL points to the app's own port (self-loop)
+
+    Warns (stderr, no exit) if the URL appears unreachable after a 2s probe.
+    """
+    litellm_url = os.environ.get("LITELLM_URL", "").strip()
+    app_port = int(os.environ.get("PORT", "8000"))
+
+    # ── Hard check 1: must be set ──────────────────────────────────────────
+    if not litellm_url:
+        print(
+            "\n[FATAL] LITELLM_URL is not set.\n"
+            "[FATAL] La variable LITELLM_URL n'est pas définie.\n\n"
+            "  The server needs an OpenAI-compatible chat-completions endpoint.\n"
+            "  Le serveur a besoin d'un endpoint chat-completions compatible OpenAI.\n\n"
+            "  Fix / Correction :\n"
+            "    cp .env.example .env\n"
+            "    # then edit .env and set LITELLM_URL, LITELLM_MODEL, LITELLM_API_KEY\n",
+            file=sys.stderr
+        )
+        sys.exit(1)
+
+    # ── Hard check 2: self-loop detection & placeholders ──────────────────
+    # Reject any URL whose host resolves to the local machine on the app port.
+    # We also reject ALL localhost/127.0.0.1/0.0.0.0 combinations on the same
+    # port — these are always self-referential for a local-only server.
+    # We ALSO reject the 'your-litellm-host' placeholder from .env.example.
+    _SELF_LOOP_HOSTS = {"localhost", "127.0.0.1", "0.0.0.0"}
+    _PLACEHOLDER_HOSTS = {"your-litellm-host", "your-tts-host"}
+
+    try:
+        parsed = urllib.parse.urlparse(litellm_url)
+        host = (parsed.hostname or "").lower()
+        port = parsed.port
+    except Exception:
+        host = ""
+        port = None
+
+    is_self_loop = (
+        host in _SELF_LOOP_HOSTS
+        and (port is None or port == app_port)
+    )
+    is_placeholder = host in _PLACEHOLDER_HOSTS
+
+    if is_self_loop or is_placeholder:
+        err_type = "self-loop" if is_self_loop else "placeholder"
+        print(
+            f"\n[FATAL] LITELLM_URL points to a {err_type} address!\n"
+            f"[FATAL] LITELLM_URL contient une adresse de type {err_type} !\n\n"
+            f"  Current value / Valeur actuelle : {litellm_url}\n\n",
+            file=sys.stderr
+        )
+        if is_self_loop:
+            print(
+                f"  The app binds on port {app_port}. Sending inference requests to itself\n"
+                f"  will cause infinite recursion and never return a useful response.\n\n"
+                f"  Le serveur écoute sur le port {app_port}. Envoyer des requêtes d'inférence\n"
+                f"  à lui-même crée une récursion infinie sans jamais répondre.\n\n",
+                file=sys.stderr
+            )
+        else:
+            print(
+                "  It looks like you are still using the placeholder host from .env.example.\n"
+                "  Il semble que vous utilisiez encore l'hôte fictif de .env.example.\n\n",
+                file=sys.stderr
+            )
+
+        print(
+            "  Fix / Correction :\n"
+            "    cp .env.example .env\n"
+            "    # then edit .env and set LITELLM_URL to your actual LiteLLM gateway\n"
+            "    # e.g. LITELLM_URL=http://your-actual-host:4000/v1/chat/completions\n",
+            file=sys.stderr
+        )
+        sys.exit(1)
+
+    # ── Soft check: connectivity probe (2s timeout, warn only) ────────────
+    try:
+        req = urllib.request.Request(litellm_url, method="HEAD")
+        urllib.request.urlopen(req, timeout=2)
+        logger.info(f"LiteLLM connectivity probe OK: {litellm_url}")
+    except Exception as probe_err:
+        # Not a hard failure — LiteLLM may be intermittently unreachable
+        print(
+            f"[WARN] LiteLLM connectivity probe failed (non-fatal): {probe_err}\n"
+            f"[WARN] Vérification de connectivité LiteLLM échouée (non bloquant): {probe_err}\n"
+            f"       URL: {litellm_url}\n"
+            f"       The server will start but /api/analyze calls may fail until LiteLLM is reachable.\n",
+            file=sys.stderr
+        )
+
+
+_validate_environment()
 
 app = FastAPI(
     title="Financial Thesis Sandbox - Top 10 Semiconductors & US AI",

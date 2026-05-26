@@ -6,6 +6,38 @@ echo "=========================================================="
 echo "Financial Thesis Sandbox - Top 10 Semiconductors & US AI"
 echo "=========================================================="
 
+# ---- Q-012 mirror: strip Anthropic/OpenAI keys so they cannot leak to subprocesses ----
+unset ANTHROPIC_API_KEY ANTHROPIC_BASE_URL ANTHROPIC_AUTH_TOKEN
+unset OPENAI_API_KEY OPENAI_BASE_URL OPENAI_ORG_ID
+
+# ---- Load .env if present ----
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+ENV_FILE="$SCRIPT_DIR/.env"
+ENV_EXAMPLE="$SCRIPT_DIR/.env.example"
+
+if [ -f "$ENV_FILE" ]; then
+  echo "Loading environment from $ENV_FILE ..."
+  set -a
+  # shellcheck disable=SC1090
+  source "$ENV_FILE"
+  set +a
+else
+  echo ""
+  echo "ERROR / ERREUR"
+  echo "  .env file not found. The server cannot start without LiteLLM configuration."
+  echo "  Le fichier .env est introuvable. Le serveur ne peut pas démarrer sans configuration LiteLLM."
+  echo ""
+  echo "  Fix / Correction :"
+  echo "    cp $ENV_EXAMPLE $ENV_FILE"
+  echo "    # then edit $ENV_FILE and set LITELLM_URL, LITELLM_MODEL, LITELLM_API_KEY"
+  echo ""
+  exit 1
+fi
+
+# ---- Re-strip Anthropic/OpenAI keys in case .env accidentally contained them ----
+unset ANTHROPIC_API_KEY ANTHROPIC_BASE_URL ANTHROPIC_AUTH_TOKEN
+unset OPENAI_API_KEY OPENAI_BASE_URL OPENAI_ORG_ID
+
 # 1. Detect Python Interpreter with required dependencies
 echo "Detecting Python environment..."
 PYTHON_EXE=""
