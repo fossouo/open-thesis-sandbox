@@ -327,7 +327,7 @@ async def perform_audio_generation(normalized: dict[str, float], lang: str, file
         )
         user_content = f"Here is the portfolio allocation:\n{weights_str}\n\nGenerate the ultra-short dialogue in the required JSON format."
 
-    logger.info(f"Generating dialogue script using model reasoning-fast on {LITELLM_URL}...")
+    logger.info(f"Generating dialogue script using model {LITELLM_MODEL} on {LITELLM_URL}...")
     timeout = httpx.Timeout(20.0, connect=5.0)
     
     dialogue_turns = []
