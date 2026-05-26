@@ -1,0 +1,28 @@
+# Runtime artifacts
+data/research.db
+data/research.db-wal
+data/research.db-shm
+data/sp500_universe.json
+data/prices_top10.json
+data/audio-cache/
+*.wav
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+.venv/
+venv/
+
+# Env
+.env
+.env.local
+
+# IDE / OS
+.vscode/
+.idea/
+.DS_Store
+
+# Reports (binary PDFs — generated locally)
+reports/

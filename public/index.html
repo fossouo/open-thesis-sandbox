@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Financial Thesis Sandbox - Top 10 Semiconductors & US AI</title>
+    <link rel="stylesheet" href="/static/index.css">
+    <!-- Chart.js loaded via CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <header>
+        <div class="logo-container">
+            <div class="logo-icon">
+                <svg style="width:1.25rem;height:1.25rem;color:white" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 002 2h2a2 2 0 002-2z"></path>
+                </svg>
+            </div>
+            <div>
+                <h1 class="logo-text" id="lbl-pageTitle">Sandbox de Thèses Financières - Top 10 US</h1>
+                <p style="font-size:0.75rem;color:var(--text-secondary)" id="lbl-pageSubtitle">Prototype local d'analyse de portefeuille IA & Backtesting</p>
+            </div>
+        </div>
+        <div class="controls-header">
+            <button class="btn-lang" id="btn-lang-toggle">🇬🇧 EN</button>
+        </div>
+    </header>
+
+    <main class="container">
+        <!-- Sidebar: Allocation Controls -->
+        <section class="glass-card">
+            <div class="card-title">
+                <span id="lbl-allocationTitle">Allocation du Portefeuille</span>
+                <span class="allocation-badge" id="allocation-total-badge">100%</span>
+            </div>
+            
+            <div class="weight-banner" id="weights-warn-banner">
+                <!-- Weight discrepancy warning text filled by app.js -->
+            </div>
+            
+            <!-- Quick Presets -->
+            <p style="font-size:0.75rem;color:var(--text-secondary);margin-bottom:0.5rem;font-weight:600;" id="lbl-presetsTitle">Préréglages</p>
+            <div class="presets-container">
+                <button class="btn-preset" id="preset-equal">
+                    <span class="preset-name" id="lbl-presetEqual">Pondération Égale</span>
+                    <span class="preset-desc" id="lbl-presetEqualDesc">Équilibre sectoriel parfait</span>
+                </button>
+                <button class="btn-preset" id="preset-ai-hard">
+                    <span class="preset-name" id="lbl-presetAiHard">Pur Hardware IA</span>
+                    <span class="preset-desc" id="lbl-presetAiHardDesc">Concentré sur les puces et infrastructures physiques</span>
+                </button>
+                <button class="btn-preset" id="preset-giants">
+                    <span class="preset-name" id="lbl-presetGiants">Géants du Cloud</span>
+                    <span class="preset-desc" id="lbl-presetGiantsDesc">Les leaders du logiciel et des LLMs à l'échelle</span>
+                </button>
+                <button class="btn-preset" id="preset-value">
+                    <span class="preset-name" id="lbl-presetValue">Value & Fonderie</span>
+                    <span class="preset-desc" id="lbl-presetValueDesc">Opportunités industrielles</span>
+                </button>
+            </div>
+
+            <!-- Dynamic Sliders List -->
+            <div class="sliders-grid" id="sliders-container">
+                <!-- Injected dynamically by app.js -->
+            </div>
+        </section>
+
+        <!-- Main Content Panel: Chart, Stats, and AI Analysis -->
+        <section class="main-panel">
+            
+            <!-- Error Banner -->
+            <div class="alert-banner" id="error-alert-banner">
+                <svg style="width:1.25rem;height:1.25rem;flex-shrink:0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                </svg>
+                <div style="flex-grow:1">
+                    <strong style="display:block;margin-bottom:0.15rem" id="lbl-errorTitle">Erreur d'analyse</strong>
+                    <span id="error-alert-text">Le serveur n'a pas répondu.</span>
+                </div>
+                <button class="alert-close" onclick="document.getElementById('error-alert-banner').classList.remove('active')">&times;</button>
+            </div>
+
+            <!-- Chart Card -->
+            <div class="glass-card chart-card">
+                <div class="card-title">
+                    <span id="lbl-perfTitle">Performance Historique (10 Ans - Base 100)</span>
+                    <button class="btn-share" id="btn-share-strategy">
+                        <svg style="width:0.9rem;height:0.9rem;display:inline-block;vertical-align:middle;margin-right:0.35rem;" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M8.684 10.742l4.62-2.31m0 7.136l-4.62-2.31M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        <span id="lbl-btnShare">Partager ma stratégie</span>
+                    </button>
+                </div>
+                
+                <!-- Performance Statistics -->
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <span class="stat-label" id="lbl-statCumul">Retour Cumulé</span>
+                        <span class="stat-value" id="val-stat-cumul">0.0%</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label" id="lbl-statCagr">Rendement Annuel (CAGR)</span>
+                        <span class="stat-value" id="val-stat-cagr">0.0%</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label" id="lbl-statMdd">Baisse Max (Drawdown)</span>
+                        <span class="stat-value" id="val-stat-mdd">0.0%</span>
+                    </div>
+                </div>
+
+                <div class="chart-container">
+                    <canvas id="portfolio-chart-canvas"></canvas>
+                </div>
+            </div>
+
+            <!-- AI Financial Analysis Card -->
+            <div class="glass-card ai-card">
+                <div class="ai-header-row">
+                    <h3 style="font-size:1.15rem;color:white" id="lbl-aiPanelTitle">Analyse Stratégique de la Thèse</h3>
+                    <button class="btn-ai" id="btn-ai-analyze">
+                        <svg style="width:1.1rem;height:1.1rem" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                        </svg>
+                        Demander une Analyse IA
+                    </button>
+                </div>
+
+                <!-- Analysis response block -->
+                <div class="ai-response-area" id="ai-response-container">
+                    <p class="ai-empty-message" id="lbl-aiEmpty">Configurez vos curseurs et cliquez sur le bouton ci-dessus pour lancer une analyse financière par votre modèle de langage configuré.</p>
+                </div>
+
+                <!-- Accordion for reasoning thoughts -->
+                <div class="accordion" id="accordion-container" style="display:none">
+                    <div class="accordion-header" id="accordion-header">
+                        <span id="lbl-reasoning-header">Afficher le raisonnement du modèle (Pensées)</span>
+                        <span class="accordion-icon" id="accordion-icon">&#9662;</span>
+                    </div>
+                    <div class="accordion-content" id="accordion-content">
+                        <pre class="reasoning-text" id="lbl-reasoning-text"></pre>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Audio Briefing Overview Card -->
+            <div class="glass-card audio-card">
+                <div class="audio-header-row">
+                    <div class="audio-title-group">
+                        <h3 style="font-size:1.15rem;color:white" id="lbl-audioPanelTitle">Briefing Audio Interactif (Podcast)</h3>
+                        <p style="font-size:0.75rem;color:var(--text-secondary)" id="lbl-audioPanelSubtitle">Dialogue IA bilingue synthétisé sur carte AMD RX 6700 XT</p>
+                    </div>
+                    <button class="btn-audio" id="btn-audio-generate">
+                        <svg style="width:1.1rem;height:1.1rem;margin-right:0.35rem;display:inline-block;vertical-align:middle" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"></path>
+                        </svg>
+                        <span id="lbl-btnAudioGenerate">Générer le briefing audio</span>
+                    </button>
+                </div>
+
+                <!-- Loading State (hidden by default) -->
+                <div class="audio-loading-area" id="audio-loading-container" style="display:none">
+                    <div class="spinner"></div>
+                    <span id="audio-loading-status" style="font-size:0.85rem;color:var(--text-secondary)">Génération du script de dialogue...</span>
+                </div>
+
+                <!-- Player State (hidden by default) -->
+                <div class="audio-player-area" id="audio-player-container" style="display:none">
+                    <audio id="audio-element" controls style="width:100%;margin-top:0.5rem;"></audio>
+                    <!-- Audio Waveform Visualization -->
+                    <div class="waveform-animation" id="waveform-container" style="display:none">
+                        <span class="bar"></span>
+                        <span class="bar"></span>
+                        <span class="bar"></span>
+                        <span class="bar"></span>
+                        <span class="bar"></span>
+                        <span class="bar"></span>
+                        <span class="bar"></span>
+                        <span class="bar"></span>
+                        <span class="bar"></span>
+                        <span class="bar"></span>
+                    </div>
+                </div>
+            </div>
+
+        </section>
+    </main>
+
+    <footer>
+        <div class="info-grid">
+            <div class="info-item">
+                <span class="dot green"></span>
+                <span id="lbl-footerServer">Serveur LLM : OpenAI-compatible (configurable via LITELLM_URL)</span>
+            </div>
+            <div class="info-item">
+                <span class="dot blue"></span>
+                <span id="lbl-footerModel">Modèle : configuré via LITELLM_MODEL</span>
+            </div>
+            <div class="info-item">
+                <span class="dot green"></span>
+                <span id="lbl-footerStatus">Statut : Connecté au serveur LLM</span>
+            </div>
+        </div>
+        <p style="margin-top:0.75rem;opacity:0.5">&copy; 2026 Sandbox Financière. Prototype local autonome.</p>
+    </footer>
+
+    <!-- Toast Notification Container -->
+    <div id="toast-container" class="toast-container"></div>
+
+    <script src="/static/app.js"></script>
+</body>
+</html>
