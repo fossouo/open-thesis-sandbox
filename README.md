@@ -14,50 +14,33 @@ any analysis later.
 > exposing the OpenAI Chat Completions shape (OpenAI itself, Ollama, vLLM,
 > llama.cpp, LiteLLM, LM Studio, etc.).
 
-## First boot
+## Getting Started
 
-1. Copy the environment template and fill in your real values:
+1. **Install dependencies**:
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+2. **Configure environment**:
    ```bash
    cp .env.example .env
-   # then edit .env — set LITELLM_URL, LITELLM_MODEL, LITELLM_API_KEY
+   # Edit .env to set LITELLM_URL, LITELLM_MODEL, etc.
    ```
-   > The startup guard will reject a missing or self-pointing `LITELLM_URL`
-   > (e.g. `http://localhost:8000/...` causes a self-loop — the app calls itself).
+   > **Note**: The server requires an OpenAI-compatible endpoint. The startup guard
+   > will reject a missing or self-pointing `LITELLM_URL` (e.g. `localhost:8000`
+   > which is the app's own port).
 
-2. Download stock data:
+3. **Download market data**:
    ```bash
+   # Downloads S&P 500 price snapshots for the backtester
    python3 download_data.py
    ```
 
-3. Start the server:
+4. **Run the server**:
    ```bash
    ./run_local.sh
    ```
-   Server runs on http://localhost:8000
-
-## Quick start
-
-```bash
-# 1. install
-pip install -r requirements.txt
-
-# 2. download S&P 500 price snapshot used by the legacy /api/prices endpoint
-python3 download_data.py
-
-# 3. point at your LLM (any OpenAI-compatible endpoint works)
-export LITELLM_URL=http://localhost:8000/v1/chat/completions
-export LITELLM_MODEL=gpt-4o-mini      # or llama3, qwen2.5, etc.
-export LITELLM_API_KEY=sk-...         # optional, only if your endpoint requires auth
-
-# 4. (optional) point at an OpenAI-compatible TTS endpoint for audio overviews
-export TTS_API_URL=http://localhost:8880/v1/audio/speech
-export TTS_MODEL=kokoro
-
-# 5. run
-./run_local.sh     # or: uvicorn main:app --reload
-```
-
-Open <http://localhost:8000>.
+   Open <http://localhost:8000> in your browser.
 
 ## Environment variables
 
@@ -66,7 +49,7 @@ Open <http://localhost:8000>.
 | `LITELLM_URL` | `http://localhost:8000/v1/chat/completions` | OpenAI-compatible Chat Completions endpoint |
 | `LITELLM_MODEL` | `gpt-4o-mini` | Model name routed by your endpoint |
 | `LITELLM_API_KEY` | *(empty)* | Bearer token, sent only if non-empty |
-| `TTS_API_URL` | `http://localhost:8880/v1/audio/speech` | OpenAI-compatible TTS endpoint (used by the audio-overview feature) |
+| `TTS_API_URL` | `http://localhost:8880/v1/audio/speech` | OpenAI-compatible TTS endpoint (for audio overviews) |
 | `TTS_MODEL` | `kokoro` | TTS model/voice name |
 | `AUDIO_CACHE_DIR` | `./data/audio-cache` | Where rendered audio is cached |
 
