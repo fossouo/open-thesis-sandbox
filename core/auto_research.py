@@ -366,6 +366,15 @@ def backtest_basket(
     """
     import yfinance as yf
     
+    if not tickers:
+        return {
+            "cumulative_return": 0.0,
+            "cagr": 0.0,
+            "max_drawdown": 0.0,
+            "values": [],
+            "dates": []
+        }
+    
     end_date = datetime.now()
     start_date = end_date - timedelta(days=lookback_days + 10)
     
