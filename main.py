@@ -978,6 +978,30 @@ def _format_node_response(node: dict, tier: str) -> dict:
     return data
 
 
+@app.get("/healthz")
+async def health_check():
+    """Health check endpoint for monitoring and orchestration."""
+    litellm_url = os.environ.get("LITELLM_URL", "").strip()
+    probe_ok = False
+    try:
+        req = urllib.request.Request(litellm_url, method="HEAD")
+        with urllib.request.urlopen(req, timeout=1) as resp:
+            probe_ok = resp.status == 200
+    except Exception:
+        probe_ok = False
+
+    prices_path = os.path.join(os.path.dirname(__file__), "data", "prices_top10.json")
+    
+    return {
+        "status": "ok",
+        "version": "1.0.0",
+        "model": LITELLM_MODEL,
+        "litellm_connected": probe_ok,
+        "prices_db_present": os.path.exists(prices_path),
+        "dag_nodes": count_nodes(dag_conn)
+    }
+
+
 @app.get("/api/config")
 async def get_config():
     """Expose non-sensitive server configuration to the UI."""
