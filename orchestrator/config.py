@@ -126,6 +126,16 @@ ROLES: dict[str, Role] = {
         llm_timeout_s=120.0,
         fallback_timeout_s=0.0,
     ),
+    "researcher": Role(
+        name="researcher",
+        git_name="thesis-researcher-agent",
+        git_email="researcher@thesis-sandbox.local",
+        primary_alias="reasoning-model",
+        fallback_alias="code",
+        daily_token_cap=1_000_000,
+        llm_timeout_s=1200.0,
+        fallback_timeout_s=600.0,
+    ),
 }
 
 

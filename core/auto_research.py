@@ -530,7 +530,8 @@ async def adversarial_review(
     lang: str,
     sector_key: str,
     db_conn,
-    depth: int = 0
+    depth: int = 0,
+    force_adversarial: bool = False
 ) -> Optional[str]:
     """
     Adversarial LLM review: analyze a failing basket and propose replacements.
@@ -538,6 +539,7 @@ async def adversarial_review(
     Triggers when:
     - max_drawdown < MAX_DRAWDOWN_THRESHOLD (-35%)
     - Any single ticker has a 60d return < UNDERPERFORM_THRESHOLD (-25%)
+    - force_adversarial is True (Deep Audit)
     
     Returns the child node ID if a new node was created, None otherwise.
     """
@@ -555,13 +557,13 @@ async def adversarial_review(
             if ret_60d < UNDERPERFORM_THRESHOLD:
                 underperformers.append((t, ret_60d))
     
-    should_review = max_dd / 100 < MAX_DRAWDOWN_THRESHOLD or len(underperformers) > 0
+    should_review = force_adversarial or max_dd / 100 < MAX_DRAWDOWN_THRESHOLD or len(underperformers) > 0
     
     if not should_review:
         logger.info(f"No adversarial review needed (DD={max_dd}%, underperformers={len(underperformers)})")
         return None
     
-    logger.info(f"Triggering adversarial review (depth={depth}, DD={max_dd}%, underperformers={underperformers})")
+    logger.info(f"Triggering adversarial review (depth={depth}, DD={max_dd}%, forced={force_adversarial}, DD={max_dd}%, underperformers={underperformers})")
     
     # Build the adversarial prompt
     underperf_text = "\n".join([f"- {t}: {r*100:.1f}% return (60d)" for t, r in underperformers])
@@ -702,7 +704,8 @@ async def adversarial_review(
 
 async def run_full_research_cycle(
     lang: str = "fr",
-    db_path: Optional[str] = None
+    db_path: Optional[str] = None,
+    force_adversarial: bool = False
 ) -> dict[str, str]:
     """
     Orchestrator: runs a full auto-research cycle.
@@ -712,13 +715,13 @@ async def run_full_research_cycle(
     3. Build global + sectoral Top 10s
     4. Backtest each basket
     5. Generate AI hypotheses
-    6. Run adversarial reviews on failing baskets
+    6. Run adversarial reviews on failing baskets (or forced)
     7. Persist all nodes to DAG
     8. Promote best nodes to canonical
     
     Returns dict mapping sector_key → node_id of the canonical node.
     """
-    logger.info(f"=== Starting Full Research Cycle (lang={lang}) ===")
+    logger.info(f"=== Starting Full Research Cycle (lang={lang}, forced={force_adversarial}) ===")
     
     # 1. Init DB
     conn = init_db(db_path)
@@ -777,7 +780,8 @@ async def run_full_research_cycle(
             lang=lang,
             sector_key=sector_key,
             db_conn=conn,
-            depth=0
+            depth=0,
+            force_adversarial=force_adversarial
         )
         
         # The best node is the final one (deepest adversarial child, or root if no review needed)

@@ -21,6 +21,7 @@ from .config import HEARTBEAT_SECONDS
 from .github_app import GitHubApp
 from .roles.backend import BackendAgent
 from .roles.ceo import CEOAgent
+from .roles.researcher import ResearcherAgent
 from .roles.triage import TriageAgent
 
 
@@ -60,7 +61,12 @@ async def amain(argv: list[str]) -> int:
     setup_logging(args.verbose)
 
     gh = GitHubApp()
-    agents = [CEOAgent(gh), TriageAgent(gh), BackendAgent(gh)]
+    agents = [
+        CEOAgent(gh),
+        TriageAgent(gh),
+        BackendAgent(gh),
+        ResearcherAgent(gh),
+    ]
 
     await log_event(
         "orchestrator", "boot",

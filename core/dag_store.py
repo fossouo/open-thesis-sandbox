@@ -61,10 +61,32 @@ def init_db(db_path: Optional[str] = None) -> sqlite3.Connection:
         CREATE INDEX IF NOT EXISTS idx_created_at ON analysis_nodes(created_at);
         CREATE INDEX IF NOT EXISTS idx_canonical ON analysis_nodes(is_canonical);
         CREATE INDEX IF NOT EXISTS idx_node_type_lang ON analysis_nodes(node_type, lang);
+
+        CREATE TABLE IF NOT EXISTS scheduler_metadata (
+            key TEXT PRIMARY KEY,
+            value TEXT NOT NULL,
+            updated_at TEXT NOT NULL
+        );
     """)
     conn.commit()
     logger.info(f"DAG store initialized at {db_path or DEFAULT_DB_PATH}")
     return conn
+
+
+def set_metadata(conn: sqlite3.Connection, key: str, value: str) -> None:
+    """Set a metadata value in the scheduler_metadata table."""
+    updated_at = datetime.now(timezone.utc).isoformat()
+    conn.execute(
+        "INSERT OR REPLACE INTO scheduler_metadata (key, value, updated_at) VALUES (?, ?, ?)",
+        (key, value, updated_at)
+    )
+    conn.commit()
+
+
+def get_metadata(conn: sqlite3.Connection, key: str) -> Optional[str]:
+    """Retrieve a metadata value by key."""
+    row = conn.execute("SELECT value FROM scheduler_metadata WHERE key = ?", (key,)).fetchone()
+    return row["value"] if row else None
 
 
 def _compute_hash(tickers: list, weights: dict, created_at: str) -> str:
