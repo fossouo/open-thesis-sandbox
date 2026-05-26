@@ -978,6 +978,16 @@ def _format_node_response(node: dict, tier: str) -> dict:
     return data
 
 
+@app.get("/api/config")
+async def get_config():
+    """Expose non-sensitive server configuration to the UI."""
+    return {
+        "model": LITELLM_MODEL,
+        "has_tts": bool(TTS_API_URL and TTS_MODEL),
+        "tts_model": TTS_MODEL
+    }
+
+
 # Serves data file for front-end loading
 @app.get("/api/prices")
 async def get_prices():

@@ -165,6 +165,9 @@ document.addEventListener("DOMContentLoaded", async () => {
         // 4. Render initial Chart
         runBacktest();
         
+        // 5. Fetch server config to update footer
+        fetchConfig();
+        
     } catch (err) {
         showError(true, "Could not load stock price database. Please run download_data.py.");
         console.error("Initialization error:", err);
@@ -621,6 +624,36 @@ function toggleReasoning() {
         label.textContent = i18n[appLanguage].reasoningHide;
     } else {
         label.textContent = i18n[appLanguage].reasoningTitle;
+    }
+}
+
+// Request server configuration
+async function fetchConfig() {
+    try {
+        const response = await fetch('/api/config');
+        if (!response.ok) return;
+        const config = await response.json();
+        
+        if (config.model) {
+            const modelEl = document.getElementById("lbl-footerModel");
+            if (modelEl) {
+                modelEl.textContent = appLanguage === 'fr' 
+                    ? `Modèle : ${config.model}` 
+                    : `Model: ${config.model}`;
+                // Save to i18n to persist across language toggles
+                i18n.fr.footerModel = `Modèle : ${config.model}`;
+                i18n.en.footerModel = `Model: ${config.model}`;
+            }
+        }
+        
+        if (!config.has_tts) {
+            const audioBtn = document.getElementById("btn-audio-generate");
+            if (audioBtn) audioBtn.style.display = "none";
+            const audioPanel = document.querySelector(".audio-card");
+            if (audioPanel) audioPanel.style.display = "none";
+        }
+    } catch (err) {
+        console.error("Failed to fetch server config:", err);
     }
 }
 
