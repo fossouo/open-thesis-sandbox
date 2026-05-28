@@ -38,6 +38,7 @@ from ..budget import (
 )
 from ..charter_rules import matches_forbidden
 from ..config import POC_ROOT, TEAM_ROOT, role
+from ..prompt_loader import load_prompt_with_retry
 from ..github_app import GitHubApp, GitHubAppError
 from ..llm import LLMError, LLMTimeout, call
 from ..worktree import (
@@ -67,9 +68,7 @@ JSON_RE = re.compile(r"\{.*\}", re.DOTALL)
 
 
 def _load_prompt() -> str:
-    if not PROMPT_PATH.exists():
-        raise FileNotFoundError(f"backend prompt manquant : {PROMPT_PATH}")
-    return PROMPT_PATH.read_text()
+    return load_prompt_with_retry("backend", PROMPT_PATH, TEAM_ROOT)
 
 
 def _extract_json(text: str) -> dict | None:
