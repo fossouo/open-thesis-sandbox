@@ -21,6 +21,7 @@ from ..budget import (
     get_client,
 )
 from ..config import TEAM_ROOT, role
+from ..prompt_loader import load_prompt_with_retry
 from ..github_app import GitHubApp
 from ..llm import LLMError, LLMTimeout, call
 
@@ -33,17 +34,18 @@ VALID_KINDS = {"kind/bug", "kind/feature", "kind/chore", "kind/task"}
 PROMPT_PATH = TEAM_ROOT / "agents" / "triage.md"
 
 
+_TRIAGE_FALLBACK = (
+    "Tu es l'agent Triage de l'équipe kola-team. Analyse l'issue et "
+    "réponds en JSON strict avec les clés: area (parmi area/api, "
+    "area/web, area/infra, area/docs, area/team-ops), kind (parmi "
+    "kind/bug, kind/feature, kind/chore, kind/task), ready (true|false), "
+    "missing_info (string court, vide si ready=true). Pas de markdown, "
+    "pas d'explication, juste le JSON."
+)
+
+
 def _load_prompt() -> str:
-    if not PROMPT_PATH.exists():
-        return (
-            "Tu es l'agent Triage de l'équipe kola-team. Analyse l'issue et "
-            "réponds en JSON strict avec les clés: area (parmi area/api, "
-            "area/web, area/infra, area/docs, area/team-ops), kind (parmi "
-            "kind/bug, kind/feature, kind/chore, kind/task), ready (true|false), "
-            "missing_info (string court, vide si ready=true). Pas de markdown, "
-            "pas d'explication, juste le JSON."
-        )
-    return PROMPT_PATH.read_text()
+    return load_prompt_with_retry("triage", PROMPT_PATH, TEAM_ROOT, fallback=_TRIAGE_FALLBACK)
 
 
 JSON_RE = re.compile(r"\{.*?\}", re.DOTALL)
