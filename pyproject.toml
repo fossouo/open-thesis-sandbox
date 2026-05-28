@@ -1,0 +1,4 @@
+[tool.pytest.ini_options]
+# Enable async test support without per-test @pytest.mark.asyncio decorators.
+# Required by tests/test_auto_research.py (and any future async tests).
+asyncio_mode = "auto"
