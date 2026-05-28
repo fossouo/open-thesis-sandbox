@@ -28,6 +28,15 @@ jobs:
         pip install -r requirements.txt
     
     - name: Run offline tests
+      env:
+        # Dummy unreachable LiteLLM URL — main.py:_validate_environment()
+        # hard-exits at module import time when LITELLM_URL is unset, which
+        # crashes pytest collection of tests/test_robustness.py. The URL is
+        # never actually called by the offline test set; the validator only
+        # checks that it is non-empty and not a self-loop on $PORT.
+        LITELLM_URL: http://localhost:9999/v1/chat/completions
+        LITELLM_MODEL: dummy-offline
+        LITELLM_API_KEY: dummy-offline
       run: |
         # Run tests that don't require price data or network
         python -m pytest tests/test_auto_research.py tests/test_robustness.py tests/test_startup_guard.py -v
