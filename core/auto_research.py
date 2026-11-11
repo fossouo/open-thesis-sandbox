@@ -35,6 +35,9 @@ logger = logging.getLogger("financial_thesis_sandbox.auto_research")
 LITELLM_URL = os.getenv("LITELLM_URL", "http://localhost:8000/v1/chat/completions")
 LITELLM_API_KEY = os.getenv("LITELLM_API_KEY", "")
 LITELLM_MODEL = os.getenv("LITELLM_MODEL", "gpt-4o-mini")
+# Read timeouts (seconds) of the two LLM calls. Slower local models need more than the defaults.
+HYPOTHESIS_TIMEOUT_S = float(os.getenv("LITELLM_HYPOTHESIS_TIMEOUT_S", "20"))
+REVIEW_TIMEOUT_S = float(os.getenv("LITELLM_REVIEW_TIMEOUT_S", "25"))
 
 def _llm_headers() -> dict:
     h = {"Content-Type": "application/json"}
@@ -480,7 +483,7 @@ async def generate_hypothesis(
             f"No introduction or greeting."
         )
     
-    timeout = httpx.Timeout(20.0, connect=5.0)
+    timeout = httpx.Timeout(HYPOTHESIS_TIMEOUT_S, connect=5.0)
     async with httpx.AsyncClient(timeout=timeout) as client:
         try:
             resp = await client.post(
@@ -601,7 +604,7 @@ async def adversarial_review(
             f'{{"exclude": ["TICKER1"], "include": ["TICKER2"], "counter_hypothesis": "..."}}'
         )
     
-    timeout = httpx.Timeout(25.0, connect=5.0)
+    timeout = httpx.Timeout(REVIEW_TIMEOUT_S, connect=5.0)
     async with httpx.AsyncClient(timeout=timeout) as client:
         try:
             resp = await client.post(
