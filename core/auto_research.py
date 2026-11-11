@@ -494,7 +494,9 @@ async def generate_hypothesis(
                     # R-501: Gemma4 has thinking=1 by default — disable to get real content
                     "chat_template_kwargs": {"enable_thinking": False},
                     "messages": [
-                        {"role": "system", "content": "You are a financial analyst."},
+                        {"role": "system", "content": (
+                            "Tu es un analyste financier. Réponds en français."
+                            if lang == "fr" else "You are a financial analyst.")},
                         {"role": "user", "content": prompt}
                     ],
                     "temperature": 0.3,
@@ -585,7 +587,7 @@ async def adversarial_review(
             f"Instructions :\n"
             f"1. Identifie les 1-3 actions les plus faibles à exclure\n"
             f"2. Propose des remplacements parmi les candidats disponibles\n"
-            f"3. Formule une contre-hypothèse en 2 phrases\n\n"
+            f"3. Formule une contre-hypothèse en 2 phrases, rédigée en français\n\n"
             f"Réponds UNIQUEMENT au format JSON (pas de markdown) :\n"
             f'{{"exclude": ["TICKER1"], "include": ["TICKER2"], "counter_hypothesis": "..."}}'
         )
@@ -615,7 +617,10 @@ async def adversarial_review(
                     # R-501: Gemma4 has thinking=1 by default — disable to get real content
                     "chat_template_kwargs": {"enable_thinking": False},
                     "messages": [
-                        {"role": "system", "content": "You are a risk analyst. Respond only in valid JSON."},
+                        {"role": "system", "content": (
+                            "Tu es un analyste de risque. Réponds uniquement en JSON valide ; "
+                            "tout texte libre doit être en français."
+                            if lang == "fr" else "You are a risk analyst. Respond only in valid JSON.")},
                         {"role": "user", "content": prompt}
                     ],
                     "temperature": 0.4,
